@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<!-- Add class for dark mode detection -->
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Manager</title>
+    
+    <!-- Load Tailwind CSS FIRST -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configure Tailwind for class-based dark mode (AFTER loading) -->
+    <script>
+        tailwind.config = {
+          darkMode: 'class',
+        }
+    </script>
+    
+    <!-- Load Chart.js for the pie chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <!-- Load custom font (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple animation for list items */
+        .list-item-enter {
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* Style for the delete button */
+        .delete-btn {
+            background-color: #ef4444; /* red-500 */
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+        li:hover .delete-btn {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen p-4 md:p-8 transition-colors duration-300">
+
+    <!-- Main Application Card -->
+    <div class="max-w-xl w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 space-y-6 transition-colors duration-300">
+        
+        <!-- Header -->
+        <h1 id="header" class="text-3xl font-bold text-center text-indigo-700 dark:text-indigo-400">Money Manager</h1>
+
+        <!-- Controls: Language and Theme -->
+        <div class="flex justify-center items-center space-x-4">
+            <!-- Language Selector -->
+            <select id="language-selector" class="px-3 py-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <option value="en">English</option>
+                <option value="zh-TW">繁體中文 (Traditional Chinese)</option>
+                <option value="zh-CN">简体中文 (Simplified Chinese)</option>
+                <option value="ja-JP">日本語 (Japanese)</option>
+            </select>
+            
+            <!-- Theme Toggle -->
+            <label for="theme-toggle" class="flex items-center cursor-pointer">
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-300">☀️</span>
+                <div class="relative mx-2">
+                    <input type="checkbox" id="theme-toggle" class="sr-only peer">
+                    <div class="block w-10 h-6 bg-gray-300 rounded-full peer-checked:bg-indigo-500 dark:bg-gray-600"></div>
+                    <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-full"></div>
+                </div>
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-300">🌙</span>
+            </label>
+        </div>
+
+        <!-- Accounts Section -->
+        <div class="space-y-4">
+            <h2 id="accounts-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200">Accounts</h2>
+            
+            <!-- Add Account Form -->
+            <form id="account-form" class="flex items-center space-x-2">
+                <input type="text" id="account-name" placeholder="e.g., Bank, Cash" required class="flex-grow px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                <button id="add-account-btn" type="submit" class="bg-indigo-500 text-white font-medium py-2 px-4 rounded-lg shadow-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-indigo-600 dark:hover:bg-indigo-700">
+                    Add Account
+                </button>
+            </form>
+
+            <!-- Account List -->
+            <div id="account-list-empty" class="text-center text-gray-500 dark:text-gray-400 py-2">
+                Add an account to get started.
+            </div>
+            <ul id="account-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Example Account Item -->
+                <!-- 
+                <li class="flex justify-between items-center bg-blue-50 dark:bg-blue-900 p-3 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <span class="font-semibold text-blue-800 dark:text-blue-200">Bank</span>
+                    <span class="font-bold text-blue-700 dark:text-blue-300">$1,200.00</span>
+                </li> 
+                -->
+            </ul>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="space-y-4">
+            <h2 id="total-balance-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200 border-t dark:border-gray-700 pt-6">Total Balance</h2>
+            <div id="total-balance" class="text-4xl font-bold text-gray-900 dark:text-gray-100">$0.00</div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Total Income Card -->
+                <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg border border-green-200 dark:border-green-700">
+                    <h3 id="total-income-title" class="text-sm font-medium text-green-700 dark:text-green-300 uppercase">Total Income</h3>
+                    <div id="total-income" class="text-2xl font-semibold text-green-600 dark:text-green-400">$0.00</div>
+                </div>
+                <!-- Total Expense Card -->
+                <div class="bg-red-50 dark:bg-red-900 p-4 rounded-lg border border-red-200 dark:border-red-700">
+                    <h3 id="total-expense-title" class="text-sm font-medium text-red-700 dark:text-red-300 uppercase">Total Expense</h3>
+                    <div id="total-expense" class="text-2xl font-semibold text-red-600 dark:text-red-400">$0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add New Transaction Form -->
+        <div class="space-y-4">
+            <h2 id="new-transaction-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200 border-t dark:border-gray-700 pt-6">Add New Transaction</h2>
+            <form id="transaction-form" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Transaction Type -->
+                    <div>
+                        <label id="type-label" for="type" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Type</label>
+                        <select id="type" name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option id="income-option" value="income">Income</option>
+                            <option id="expense-option" value="expense">Expense</option>
+                            <option id="transfer-option" value="transfer">Transfer</option>
+                        </select>
+                    </div>
+                    <!-- Account (From) -->
+                    <div id="account-from-row">
+                        <label id="account-from-label" for="account-from-select" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Account</label>
+                        <select id="account-from-select" name="account-from-select" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <!-- Options will be dynamically populated -->
+                        </select>
+                    </div>
+                    <!-- Account (To) -->
+                    <div id="account-to-row" style="display: none;">
+                        <label id="account-to-label" for="account-to-select" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">To Account</label>
+                        <select id="account-to-select" name="account-to-select" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <!-- Options will be dynamically populated -->
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Category -->
+                <div id="category-row">
+                    <label id="category-label" for="category" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Category</label>
+                    <select id="category" name="category" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <!-- Options will be dynamically populated -->
+                    </select>
+                </div>
+                
+                <!-- Description -->
+                <div>
+                    <label id="desc-label" for="desc" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Description (Optional)</label>
+                    <input type="text" id="desc" name="desc" placeholder="e.g., Lunch with client" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                </div>
+                
+                <!-- Amount -->
+                <div>
+                    <label id="amount-label" for="amount" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Amount</label>
+                    <input type="number" id="amount" name="amount" placeholder="0.00" min="0.01" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                </div>
+                
+                <!-- Submit Button -->
+                <button id="add-transaction-btn" type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 dark:bg-indigo-700 dark:hover:bg-indigo-800">
+                    Add Transaction
+                </button>
+            </form>
+        </div>
+
+        <!-- Expense Breakdown Chart -->
+        <div class="space-y-4">
+            <h2 id="chart-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200 border-t dark:border-gray-700 pt-6">Expense Breakdown</h2>
+            <div id="chart-empty-state" class="text-center text-gray-500 dark:text-gray-400 py-4">
+                Add an expense to see the chart.
+            </div>
+            <div class="w-full max-w-md mx-auto h-64">
+                <canvas id="expense-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="space-y-4">
+            <!-- History Header with Download Button -->
+            <div class="flex justify-between items-center border-t dark:border-gray-700 pt-6">
+                <h2 id="history-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200">History</h2>
+                <button id="download-csv-btn" class="text-sm bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-1 px-3 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                    Download CSV
+                </button>
+            </div>
+            
+            <!-- Message for when the list is empty -->
+            <div id="empty-state" class="text-center text-gray-500 dark:text-gray-400 py-4">
+                No transactions yet.
+            </div>
+            <!-- List of transactions -->
+            <ul id="transaction-list" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                <!-- Transactions will be dynamically inserted here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // --- Constants ---
+        const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Bonus', 'Investment', 'Other'];
+        const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Utilities', 'Rent', 'Entertainment', 'Shopping', 'Health', 'Other'];
+        const STORAGE_KEY_TRANSACTIONS = 'money-manager-transactions-v2';
+        const STORAGE_KEY_ACCOUNTS = 'money-manager-accounts-v2';
+        const STORAGE_KEY_LANGUAGE = 'money-manager-language';
+        const STORAGE_KEY_THEME = 'money-manager-theme-v2';
+
+        // --- Internationalization (i18n) Text ---
+        const i18n = {
+            'en': {
+                title: "Money Manager",
+                header: "Money Manager",
+                accountsTitle: "Accounts",
+                accountPlaceholder: "e.g., Bank, Cash",
+                addAccountBtn: "Add Account",
+                accountEmpty: "Add an account to get started.",
+                totalBalanceTitle: "Total Balance",
+                totalIncomeTitle: "Total Income",
+                totalExpenseTitle: "Total Expense",
+                newTransactionTitle: "Add New Transaction",
+                typeLabel: "Type",
+                incomeOption: "Income",
+                expenseOption: "Expense",
+                transferOption: "Transfer",
+                accountLabel: "Account",
+                accountLabelFrom: "From Account",
+                accountLabelTo: "To Account",
+                accountSelectDefault: "Add an account first",
+                categoryLabel: "Category",
+                descLabel: "Description (Optional)",
+                descPlaceholder: "e.g., Lunch with client",
+                amountLabel: "Amount",
+                amountPlaceholder: "0.00",
+                addTransactionBtn: "Add Transaction",
+                chartTitle: "Expense Breakdown",
+                chartEmpty: "Add an expense to see the chart.",
+                historyTitle: "History",
+                historyEmpty: "No transactions yet.",
+                deleteTooltip: "Delete transaction",
+                unknownAccount: "Unknown",
+                downloadCsvBtn: "Download CSV", // New
+                pdfDate: "Date", // New
+                pdfType: "Type", // New
+                pdfAccount: "Account", // New
+                categories: {
+                    'Salary': 'Salary', 'Freelance': 'Freelance', 'Bonus': 'Bonus', 'Investment': 'Investment',
+                    'Food': 'Food', 'Transport': 'Transport', 'Utilities': 'Utilities', 'Rent': 'Rent', 'Entertainment': 'Entertainment', 'Shopping': 'Shopping', 'Health': 'Health', 'Other': 'Other',
+                    'Transfer': 'Transfer'
+                }
+            },
+            'zh-TW': {
+                title: "記帳本",
+                header: "記帳本",
+                accountsTitle: "帳戶",
+                accountPlaceholder: "例如：銀行, 現金",
+                addAccountBtn: "新增帳戶",
+                accountEmpty: "請先新增一個帳戶",
+                totalBalanceTitle: "總餘額",
+                totalIncomeTitle: "總收入",
+                totalExpenseTitle: "總支出",
+                newTransactionTitle: "新增交易",
+                typeLabel: "類型",
+                incomeOption: "收入",
+                expenseOption: "支出",
+                transferOption: "轉帳",
+                accountLabel: "帳戶",
+                accountLabelFrom: "從 帳戶",
+                accountLabelTo: "至 帳戶",
+                accountSelectDefault: "請先新增帳戶",
+                categoryLabel: "類別",
+                descLabel: "描述 (選填)",
+                descPlaceholder: "例如：與客戶共進午餐",
+                amountLabel: "金額",
+                amountPlaceholder: "0.00",
+                addTransactionBtn: "新增交易",
+                chartTitle: "支出分析",
+                chartEmpty: "新增支出後將顯示圖表",
+                historyTitle: "交易紀錄",
+                historyEmpty: "尚無交易紀錄",
+                deleteTooltip: "刪除交易",
+                unknownAccount: "未知帳戶",
+                downloadCsvBtn: "下載 CSV", // New
+                pdfDate: "日期", // New
+                pdfType: "類型", // New
+                pdfAccount: "帳戶", // New
+                categories: {
+                    'Salary': '薪水', 'Freelance': '接案', 'Bonus': '獎金', 'Investment': '投資',
+                    'Food': '食物', 'Transport': '交通', 'Utilities': '水電瓦斯', 'Rent': '租金', 'Entertainment': '娛樂', 'Shopping': '購物', 'Health': '健康', 'Other': '其他',
+                    'Transfer': '轉帳'
+                }
+            },
+            'zh-CN': {
+                title: "记账本",
+                header: "记账本",
+                accountsTitle: "账户",
+                accountPlaceholder: "例如：银行, 现金",
+                addAccountBtn: "新增账户",
+                accountEmpty: "请先新增一个账户",
+                totalBalanceTitle: "总余额",
+                totalIncomeTitle: "总收入",
+                totalExpenseTitle: "总支出",
+                newTransactionTitle: "新增交易",
+                typeLabel: "类型",
+                incomeOption: "收入",
+                expenseOption: "支出",
+                transferOption: "转账",
+                accountLabel: "账户",
+                accountLabelFrom: "从 账户",
+                accountLabelTo: "至 账户",
+                accountSelectDefault: "请先新增账户",
+                categoryLabel: "类别",
+                descLabel: "描述 (选填)",
+                descPlaceholder: "例如：与客户共进午餐",
+                amountLabel: "金额",
+                amountPlaceholder: "0.00",
+                addTransactionBtn: "新增交易",
+                chartTitle: "支出分析",
+                chartEmpty: "新增支出后将显示图表",
+                historyTitle: "交易记录",
+                historyEmpty: "尚无交易记录",
+                deleteTooltip: "删除交易",
+                unknownAccount: "未知账户",
+                downloadCsvBtn: "下载 CSV", // New
+                pdfDate: "日期", // New
+                pdfType: "类型", // New
+                pdfAccount: "账户", // New
+                categories: {
+                    'Salary': '薪水', 'Freelance': 'SOHO', 'Bonus': '奖金', 'Investment': '投资',
+                    'Food': '食物', 'Transport': '交通', 'Utilities': '水电费', 'Rent': '房租', 'Entertainment': '娱乐', 'Shopping': '购物', 'Health': '健康', 'Other': '其他',
+                    'Transfer': '转账'
+                }
+            },
+            'ja-JP': {
+                title: "家計簿マネージャー",
+                header: "家計簿マネージャー",
+                accountsTitle: "口座",
+                accountPlaceholder: "例：銀行, 現金",
+                addAccountBtn: "口座を追加",
+                accountEmpty: "まず口座を追加してください",
+                totalBalanceTitle: "総残高",
+                totalIncomeTitle: "総収入",
+                totalExpenseTitle: "総支出",
+                newTransactionTitle: "新しい取引を追加",
+                typeLabel: "タイプ",
+                incomeOption: "収入",
+                expenseOption: "支出",
+                transferOption: "振替",
+                accountLabel: "口座",
+                accountLabelFrom: "振替元口座",
+                accountLabelTo: "振替先口座",
+                accountSelectDefault: "まず口座を追加してください",
+                categoryLabel: "カテゴリー",
+                descLabel: "詳細 (任意)",
+                descPlaceholder: "例：クライアントと昼食",
+                amountLabel: "金額",
+                amountPlaceholder: "0.00",
+                addTransactionBtn: "取引を追加",
+                chartTitle: "支出内訳",
+                chartEmpty: "支出を追加するとチャートが表示されます",
+                historyTitle: "取引履歴",
+                historyEmpty: "まだ取引がありません",
+                deleteTooltip: "取引を削除",
+                unknownAccount: "不明な口座",
+                downloadCsvBtn: "CSVをダウンロード", // New
+                pdfDate: "日付", // New
+                pdfType: "タイプ", // New
+                pdfAccount: "口座", // New
+                categories: {
+                    'Salary': '給与', 'Freelance': 'フリーランス', 'Bonus': 'ボーナス', 'Investment': '投資',
+                    'Food': '食費', 'Transport': '交通費', 'Utilities': '光熱費', 'Rent': '家賃', 'Entertainment': '娯楽', 'Shopping': '買い物', 'Health': '健康', 'Other': 'その他',
+                    'Transfer': '振替'
+                }
+            }
+        };
+
+        // --- DOM Elements ---
+        const totalBalanceEl = document.getElementById('total-balance');
+        const totalIncomeEl = document.getElementById('total-income');
+        const totalExpenseEl = document.getElementById('total-expense');
+        const transactionListEl = document.getElementById('transaction-list');
+        const emptyStateEl = document.getElementById('empty-state');
+        const chartEmptyStateEl = document.getElementById('chart-empty-state');
+        const chartCanvas = document.getElementById('expense-chart');
+        const form = document.getElementById('transaction-form');
+        const typeInput = document.getElementById('type');
+        const categoryInput = document.getElementById('category');
+        const descInput = document.getElementById('desc');
+        const amountInput = document.getElementById('amount');
+        const chartCtx = chartCanvas.getContext('2d');
+        const accountForm = document.getElementById('account-form');
+        const accountNameInput = document.getElementById('account-name');
+        const accountListEl = document.getElementById('account-list');
+        const accountListEmptyEl = document.getElementById('account-list-empty');
+        
+        const accountFromLabel = document.getElementById('account-from-label');
+        const accountFromSelect = document.getElementById('account-from-select');
+        const accountToRow = document.getElementById('account-to-row');
+        const accountToSelect = document.getElementById('account-to-select');
+        const categoryRow = document.getElementById('category-row');
+
+        const langSelector = document.getElementById('language-selector');
+        const themeToggle = document.getElementById('theme-toggle');
+        const downloadCsvBtn = document.getElementById('download-csv-btn'); // New
+
+        // --- App State ---
+        let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY_TRANSACTIONS)) || [];
+        let accounts = JSON.parse(localStorage.getItem(STORAGE_KEY_ACCOUNTS)) || [];
+        let currentLang = localStorage.getItem(STORAGE_KEY_LANGUAGE) || 'en';
+        let expenseChart; // To hold the Chart.js instance
+
+        // --- Functions ---
+
+        /**
+         * Saves the current transactions array to local storage.
+         */
+        function saveTransactions() {
+            localStorage.setItem(STORAGE_KEY_TRANSACTIONS, JSON.stringify(transactions));
+        }
+
+        /**
+         * Saves the current accounts array to local storage.
+         */
+        function saveAccounts() {
+            localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(accounts));
+        }
+
+        /**
+         * Generates a unique ID.
+         */
+        function generateID() {
+            return Math.floor(Math.random() * 100000000);
+        }
+
+        /**
+         * Formats a number as currency (USD).
+         */
+        function formatCurrency(num) {
+            return '$' + num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+
+        /**
+         * Populates the category dropdown based on transaction type.
+         */
+        function updateCategoryOptions() {
+            const t = i18n[currentLang].categories; // Get translated categories
+            const selectedType = typeInput.value;
+            const categories = (selectedType === 'income') ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+            
+            categoryInput.innerHTML = ''; // Clear existing options
+            
+            categories.forEach(categoryKey => { // 'categoryKey' is 'Salary', 'Food', etc.
+                const option = document.createElement('option');
+                option.value = categoryKey; // Value is the English key
+                option.textContent = t[categoryKey] || categoryKey; // Text is the translation
+                categoryInput.appendChild(option);
+            });
+        }
+
+        /**
+         * Renders the list of accounts and populates the account dropdown.
+         */
+        function renderAccounts() {
+            accountListEl.innerHTML = '';
+            accountFromSelect.innerHTML = ''; // Clear dropdown
+            accountToSelect.innerHTML = ''; // Clear dropdown
+
+            if (accounts.length === 0) {
+                accountListEmptyEl.style.display = 'block';
+                // Add a disabled option to the dropdown
+                const defaultOption = document.createElement('option');
+                defaultOption.textContent = i18n[currentLang].accountSelectDefault; // Use translation
+                defaultOption.disabled = true;
+
+                accountFromSelect.appendChild(defaultOption.cloneNode(true));
+                accountToSelect.appendChild(defaultOption.cloneNode(true));
+            } else {
+                accountListEmptyEl.style.display = 'none';
+                
+                accounts.forEach(account => {
+                    // Add to account list
+                    const li = document.createElement('li');
+                    li.className = 'flex justify-between items-center bg-blue-50 dark:bg-blue-900 p-3 rounded-lg border border-blue-200 dark:border-blue-700 list-item-enter';
+                    li.innerHTML = `
+                        <span class="font-semibold text-blue-800 dark:text-blue-200">${account.name}</span>
+                        <span class="font-bold text-blue-700 dark:text-blue-300">${formatCurrency(account.balance)}</span>
+                    `;
+                    accountListEl.appendChild(li);
+
+                    // Add to account dropdown
+                    const option = document.createElement('option');
+                    option.value = account.id;
+                    option.textContent = account.name;
+
+                    accountFromSelect.appendChild(option.cloneNode(true));
+                    accountToSelect.appendChild(option.cloneNode(true));
+                });
+            }
+        }
+
+        /**
+         * Adds a new transaction to the DOM.
+         */
+        function addTransactionToDOM(transaction) {
+            const { id, desc, category, amount, type, date, accountId, accountIdFrom, accountIdTo } = transaction;
+            
+            const li = document.createElement('li');
+            li.classList.add(
+                'flex', 'justify-between', 'items-center', 'bg-gray-50', 'dark:bg-gray-700', 'p-3',
+                'rounded-lg', 'shadow-sm', 'border', 'border-gray-200', 'dark:border-gray-600', 'list-item-enter'
+            );
+            
+            const t = i18n[currentLang].categories;
+            const descriptionHtml = desc ? `<span class="text-sm text-gray-600 dark:text-gray-400">${desc}</span>` : '';
+            let detailsHtml = '';
+            let amountHtml = '';
+
+            if (type === 'income' || type === 'expense') {
+                const sign = type === 'income' ? '+' : '-';
+                const colorClass = type === 'income' ? 'text-green-500' : 'text-red-500';
+                
+                const account = accounts.find(a => a.id === accountId);
+                const accountName = account ? account.name : i18n[currentLang].unknownAccount; // Use translation
+                const accountNameHtml = `<span class="text-xs text-blue-600 dark:text-blue-400 font-medium">${accountName}</span>`;
+                const translatedCategory = t[category] || category; // Look up translation
+
+                detailsHtml = `
+                    <span class="font-medium text-gray-800 dark:text-gray-100">${translatedCategory}</span>
+                    ${descriptionHtml}
+                    <div>
+                        ${accountNameHtml}
+                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">(${date})</span>
+                    </div>`;
+                
+                amountHtml = `<span class="font-semibold ${colorClass}">${sign}${formatCurrency(amount)}</span>`;
+
+            } else if (type === 'transfer') {
+                const accountFrom = accounts.find(a => a.id === accountIdFrom);
+                const accountTo = accounts.find(a => a.id === accountIdTo);
+                const accountFromName = accountFrom ? accountFrom.name : i18n[currentLang].unknownAccount;
+                const accountToName = accountTo ? accountTo.name : i18n[currentLang].unknownAccount;
+
+                const transferText = t['Transfer'] || 'Transfer';
+                const transferDetails = `<span class="text-xs text-blue-600 dark:text-blue-400 font-medium">From ${accountFromName} to ${accountToName}</span>`;
+
+                detailsHtml = `
+                    <span class="font-medium text-gray-800 dark:text-gray-100">${transferText}</span>
+                    ${descriptionHtml}
+                    <div>
+                        ${transferDetails}
+                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">(${date})</span>
+                    </div>`;
+
+                amountHtml = `<span class="font-semibold text-gray-700 dark:text-gray-300">${formatCurrency(amount)}</span>`;
+            }
+
+            li.innerHTML = `
+                <div class="flex flex-col space-y-0.5">
+                    ${detailsHtml}
+                </div>
+                <div class="flex items-center space-x-3">
+                    ${amountHtml}
+                    <button class="delete-btn" data-id="${id}" title="${i18n[currentLang].deleteTooltip}">×</button>
+                </div>
+            `;
+            
+            transactionListEl.appendChild(li);
+        }
+
+        /**
+         * Updates the summary (balance, income, expense).
+         */
+        function updateSummary() {
+            // Total income/expense across all transactions (ignoring transfers)
+            const totalIncome = transactions
+                .filter(t => t.type === 'income')
+                .reduce((acc, t) => acc + t.amount, 0);
+
+            const totalExpense = transactions
+                .filter(t => t.type === 'expense')
+                .reduce((acc, t) => acc + t.amount, 0);
+
+            // Total balance is the sum of all account balances
+            const totalBalance = accounts.reduce((acc, account) => acc + account.balance, 0);
+
+            totalBalanceEl.textContent = formatCurrency(totalBalance);
+            totalIncomeEl.textContent = formatCurrency(totalIncome);
+            totalExpenseEl.textContent = formatCurrency(totalExpense);
+            
+            // Update balance color
+            totalBalanceEl.classList.remove('text-gray-900', 'text-red-600', 'text-green-600', 'dark:text-gray-100', 'dark:text-red-500', 'dark:text-green-500');
+            const isDark = document.documentElement.classList.contains('dark');
+            if (totalBalance < 0) {
+                totalBalanceEl.classList.add(isDark ? 'dark:text-red-500' : 'text-red-600');
+            } else if (totalBalance > 0) {
+                totalBalanceEl.classList.add(isDark ? 'dark:text-green-500' : 'text-green-600');
+            } else {
+                totalBalanceEl.classList.add(isDark ? 'dark:text-gray-100' : 'text-gray-900');
+            }
+        }
+
+        /**
+         * Renders the entire transaction list.
+         */
+        function renderTransactionList() {
+            transactionListEl.innerHTML = '';
+            
+            if (transactions.length === 0) {
+                emptyStateEl.style.display = 'block';
+            } else {
+                emptyStateEl.style.display = 'none';
+                // Display most recent first
+                transactions.slice().reverse().forEach(addTransactionToDOM);
+            }
+        }
+
+        /**
+         * Initializes the pie chart.
+         */
+        function initPieChart() {
+            if (expenseChart) {
+                expenseChart.destroy();
+            }
+
+            // Set chart label colors based on theme
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const legendColor = isDarkMode ? '#e5e7eb' : '#374151'; // gray-200 or gray-700
+
+            expenseChart = new Chart(chartCtx, {
+                type: 'pie',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Expenses',
+                        data: [],
+                        backgroundColor: [
+                            '#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', 
+                            '#14b8a6', '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef'
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                boxWidth: 12,
+                                color: legendColor // Apply dynamic color
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Updates the pie chart with current expense data.
+         */
+        function updatePieChart() {
+            const expenseTransactions = transactions.filter(t => t.type === 'expense');
+            
+            if (expenseTransactions.length === 0) {
+                chartEmptyStateEl.style.display = 'block';
+                chartCanvas.style.display = 'none';
+                return;
+            }
+
+            chartEmptyStateEl.style.display = 'none';
+            chartCanvas.style.display = 'block';
+
+            const categoryTotals = expenseTransactions.reduce((acc, transaction) => {
+                const { category, amount } = transaction;
+                if (!acc[category]) {
+                    acc[category] = 0;
+                }
+                acc[category] += amount;
+                return acc;
+            }, {});
+
+            const t = i18n[currentLang].categories;
+            const labels = Object.keys(categoryTotals).map(key => t[key] || key); // Translate the labels for the chart
+            const data = Object.values(categoryTotals);
+
+            expenseChart.data.labels = labels;
+            expenseChart.data.datasets[0].data = data;
+            expenseChart.update();
+        }
+
+        /**
+         * Main update function to refresh the entire UI.
+         */
+        function updateUI() {
+            renderAccounts();
+            updateSummary();
+            renderTransactionList();
+            updatePieChart();
+            
+            saveTransactions();
+            saveAccounts();
+        }
+
+        /**
+         * Applies the selected language to all static text elements.
+         */
+        function applyLanguage(lang) {
+            currentLang = lang; // Set the global state
+            localStorage.setItem(STORAGE_KEY_LANGUAGE, currentLang);
+
+            const t = i18n[lang];
+            if (!t) {
+                console.error(`Language ${lang} not found, defaulting to 'en'.`);
+                t = i18n['en'];
+            }
+
+            // --- Apply translations ---
+            document.title = t.title;
+            document.getElementById('header').textContent = t.header;
+            document.getElementById('accounts-title').textContent = t.accountsTitle;
+            document.getElementById('account-name').placeholder = t.accountPlaceholder;
+            document.getElementById('add-account-btn').textContent = t.addAccountBtn;
+            document.getElementById('account-list-empty').textContent = t.accountEmpty;
+            document.getElementById('total-balance-title').textContent = t.totalBalanceTitle;
+            document.getElementById('total-income-title').textContent = t.totalIncomeTitle;
+            document.getElementById('total-expense-title').textContent = t.totalExpenseTitle;
+            document.getElementById('new-transaction-title').textContent = t.newTransactionTitle;
+            document.getElementById('type-label').textContent = t.typeLabel;
+            document.getElementById('income-option').textContent = t.incomeOption;
+            document.getElementById('expense-option').textContent = t.expenseOption;
+            document.getElementById('transfer-option').textContent = t.transferOption;
+            document.getElementById('account-from-label').textContent = t.accountLabel;
+            document.getElementById('account-to-label').textContent = t.accountLabelTo;
+            document.getElementById('category-label').textContent = t.categoryLabel;
+            document.getElementById('desc-label').textContent = t.descLabel;
+            document.getElementById('desc').placeholder = t.descPlaceholder;
+            document.getElementById('amount-label').textContent = t.amountLabel;
+            document.getElementById('amount').placeholder = t.amountPlaceholder;
+            document.getElementById('add-transaction-btn').textContent = t.addTransactionBtn;
+            document.getElementById('chart-title').textContent = t.chartTitle;
+            document.getElementById('chart-empty-state').textContent = t.chartEmpty;
+            document.getElementById('history-title').textContent = t.historyTitle;
+            document.getElementById('empty-state').textContent = t.historyEmpty;
+            document.getElementById('download-csv-btn').textContent = t.downloadCsvBtn; // New
+            
+            // Update categories dropdown (if visible)
+            updateCategoryOptions();
+            
+            // Redraw the entire UI with new language
+            updateUI();
+
+            // Re-apply form UI logic based on current type
+            handleTypeChange();
+        }
+
+        /**
+         * Handles adding a new account.
+         */
+        function handleAddAccount(e) {
+            e.preventDefault();
+            const name = accountNameInput.value.trim();
+            
+            if (name === '') return;
+
+            const newAccount = {
+                id: generateID(),
+                name: name,
+                balance: 0
+            };
+
+            accounts.push(newAccount);
+            updateUI();
+            accountNameInput.value = '';
+        }
+
+        /**
+         * Handles the form submission to add a new transaction.
+         */
+        function handleAddTransaction(e) {
+            e.preventDefault();
+
+            const type = typeInput.value;
+            const amount = +amountInput.value;
+
+            if (amountInput.value.trim() === '' || amount <= 0) {
+                 console.error('Please enter a valid amount');
+                 return;
+            }
+
+            if (type === 'income' || type === 'expense') {
+                const accountId = +accountFromSelect.value;
+                if (!accountId || (categoryRow.style.display !== 'none' && categoryInput.value.trim() === '')) {
+                    console.error('Please fill all required fields');
+                    return;
+                }
+
+                const newTransaction = {
+                    id: generateID(),
+                    type: type,
+                    category: categoryInput.value,
+                    desc: descInput.value.trim(),
+                    amount: amount,
+                    date: new Date().toLocaleDateString(),
+                    accountId: accountId
+                };
+
+                transactions.push(newTransaction);
+
+                // Update account balance
+                const account = accounts.find(a => a.id === accountId);
+                if (account) {
+                    if (newTransaction.type === 'income') {
+                        account.balance += newTransaction.amount;
+                    } else {
+                        account.balance -= newTransaction.amount; // Corrected from newEwTransaction
+                    }
+                }
+
+            } else if (type === 'transfer') {
+                const accountIdFrom = +accountFromSelect.value;
+                const accountIdTo = +accountToSelect.value;
+
+                if (!accountIdFrom || !accountIdTo) {
+                    console.error('Please select both accounts for transfer');
+                    return;
+                }
+
+                if (accountIdFrom === accountIdTo) {
+                    console.error('Cannot transfer to the same account');
+                    return;
+                }
+
+                const newTransaction = {
+                    id: generateID(),
+                    type: 'transfer',
+                    desc: descInput.value.trim(),
+                    amount: amount,
+                    date: new Date().toLocaleDateString(),
+                    accountIdFrom: accountIdFrom,
+                    accountIdTo: accountIdTo
+                };
+
+                transactions.push(newTransaction);
+
+                // Update account balances
+                const accountFrom = accounts.find(a => a.id === accountIdFrom);
+                const accountTo = accounts.find(a => a.id === accountIdTo);
+
+                if (accountFrom) {
+                    accountFrom.balance -= amount;
+                }
+                if (accountTo) {
+                    accountTo.balance += amount;
+                }
+            }
+            
+            updateUI();
+
+            // Clear form fields
+            descInput.value = '';
+            amountInput.value = '';
+        }
+
+        /**
+         * Handles the click event to delete a transaction.
+         */
+        function handleDeleteTransaction(e) {
+            if (e.target.classList.contains('delete-btn')) {
+                const id = +e.target.dataset.id;
+                
+                // Find transaction to delete
+                const transaction = transactions.find(t => t.id === id);
+                if (!transaction) return;
+
+                // Find associated account and revert balance
+                if (transaction.type === 'income' || transaction.type === 'expense') {
+                    const account = accounts.find(a => a.id === transaction.accountId);
+                    if (account) {
+                        if (transaction.type === 'income') {
+                            account.balance -= transaction.amount;
+                        } else {
+                            account.balance += transaction.amount;
+                        }
+                    }
+                } else if (transaction.type === 'transfer') {
+                    const accountFrom = accounts.find(a => a.id === transaction.accountIdFrom);
+                    const accountTo = accounts.find(a => a.id === transaction.accountIdTo);
+                    if (accountFrom) {
+                        accountFrom.balance += transaction.amount;
+                    }
+                    if (accountTo) {
+                        accountTo.balance -= transaction.amount;
+                    }
+                }
+
+                // Remove transaction from state
+                transactions = transactions.filter(t => t.id !== id);
+                
+                updateUI();
+            }
+        }
+
+        /**
+         * Updates the transaction form UI based on the selected type.
+         */
+        function handleTypeChange() {
+            const selectedType = typeInput.value;
+            const t = i18n[currentLang];
+
+            if (selectedType === 'transfer') {
+                categoryRow.style.display = 'none';
+                accountToRow.style.display = 'block';
+                accountFromLabel.textContent = t.accountLabelFrom;
+                // Make sure "To Account" select is required
+                accountToSelect.required = true;
+                categoryInput.required = false;
+
+            } else { // 'income' or 'expense'
+                categoryRow.style.display = 'block';
+                accountToRow.style.display = 'none';
+                accountFromLabel.textContent = t.accountLabel;
+                // Make sure "To Account" select is not required
+                accountToSelect.required = false;
+                categoryInput.required = true;
+                
+                // Update categories for income/expense
+                updateCategoryOptions();
+            }
+        }
+
+        // --- Theme Functions ---
+
+        /**
+         * Applies the selected theme ('light' or 'dark') to the <html> tag and saves it.
+         */
+        function applyTheme(theme) {
+            localStorage.setItem(STORAGE_KEY_THEME, theme);
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        /**
+         * Handles the theme toggle checkbox change event.
+         */
+        function handleThemeToggle() {
+            const newTheme = themeToggle.checked ? 'dark' : 'light';
+            applyTheme(newTheme);
+            // Re-init chart with new colors
+            initPieChart();
+            updatePieChart();
+            // Re-render summary for new balance colors
+            updateSummary();
+        }
+
+        // --- Download CSV Function (New) ---
+        
+        /**
+         * Handles the click event to download the transaction history as a CSV file.
+         */
+        function handleDownloadCSV() {
+            if (transactions.length === 0) {
+                console.warn('No transactions to download.');
+                return;
+            }
+
+            const t = i18n[currentLang];
+            const tCat = t.categories;
+
+            // --- Create CSV Headers ---
+            // Get translated labels, removing any parenthetical notes
+            const descLabel = t.descLabel.replace(/\s*\(.*\)\s*/, '');
+            const categoryLabel = t.categoryLabel.replace(/\s*\(.*\)\s*/, '');
+            const amountLabel = t.amountLabel.replace(/\s*\(.*\)\s*/, '');
+            
+            const headers = [
+                `"${t.pdfDate || 'Date'}"`,
+                `"${t.pdfType || 'Type'}"`,
+                `"${t.pdfAccount || 'Account'}"`,
+                `"${categoryLabel}"`,
+                `"${descLabel}"`,
+                `"${amountLabel}"`
+            ].join(',');
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += headers + "\r\n";
+
+            // --- Create CSV Body ---
+            // Helper to escape quotes inside a CSV field
+            const escapeCSV = (str) => `"${str ? str.replace(/"/g, '""') : ''}"`;
+
+            transactions.forEach(tx => {
+                let type, account, category, amount, desc;
+                
+                desc = escapeCSV(tx.desc);
+                
+                if (tx.type === 'income') {
+                    type = escapeCSV(t.incomeOption);
+                    const acc = accounts.find(a => a.id === tx.accountId);
+                    account = escapeCSV(acc ? acc.name : t.unknownAccount);
+                    category = escapeCSV(tCat[tx.category] || tx.category);
+                    amount = `"+${tx.amount.toFixed(2)}"`;
+                } else if (tx.type === 'expense') {
+                    type = escapeCSV(t.expenseOption);
+                    const acc = accounts.find(a => a.id === tx.accountId);
+                    account = escapeCSV(acc ? acc.name : t.unknownAccount);
+                    category = escapeCSV(tCat[tx.category] || tx.category);
+                    amount = `"-${tx.amount.toFixed(2)}"`;
+                } else { // transfer
+                    type = escapeCSV(t.transferOption);
+                    const from = accounts.find(a => a.id === tx.accountIdFrom);
+                    const to = accounts.find(a => a.id === tx.accountIdTo);
+                    const accountDetails = `From ${from ? from.name : t.unknownAccount} to ${to ? to.name : t.unknownAccount}`;
+                    account = escapeCSV(accountDetails);
+                    category = '"-"';
+                    amount = `"${tx.amount.toFixed(2)}"`;
+                }
+                
+                const row = [escapeCSV(tx.date), type, account, category, desc, amount].join(',');
+                csvContent += row + "\r\n";
+            });
+
+            // --- Create and Trigger Download Link ---
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "money-manager-history.csv");
+            document.body.appendChild(link); // Required for Firefox
+            
+            link.click();
+            
+            document.body.removeChild(link);
+        }
+
+
+        /**
+         * Initializes the application.
+         */
+        function init() {
+            // Add event listeners
+            accountForm.addEventListener('submit', handleAddAccount);
+            form.addEventListener('submit', handleAddTransaction);
+            transactionListEl.addEventListener('click', handleDeleteTransaction);
+            typeInput.addEventListener('change', handleTypeChange);
+            langSelector.addEventListener('change', (e) => applyLanguage(e.target.value));
+            themeToggle.addEventListener('change', handleThemeToggle);
+            downloadCsvBtn.addEventListener('click', handleDownloadCSV); // New
+
+            
+            // --- Initial Setup ---
+            
+            // Load and apply initial theme
+            let savedTheme = localStorage.getItem(STORAGE_KEY_THEME) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(savedTheme);
+            themeToggle.checked = (savedTheme === 'dark');
+
+            // Set language dropdown to stored value
+            langSelector.value = currentLang; 
+            
+            // Create the chart instance (now theme-aware)
+            initPieChart(); 
+            
+            // Apply language and render all data
+            applyLanguage(currentLang); 
+        }
+
+        // --- Run the App ---
+        init();
+        
+    </script>
+</body>
+</html>
