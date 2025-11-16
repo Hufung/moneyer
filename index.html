@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- Add class for dark mode detection -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -9,19 +8,15 @@
     <meta name="description" content="Moneyer is a website that help you manage your money, all the data is store locally.">
     <title>Money Manager</title>
     
-    <!-- Load Tailwind CSS FIRST -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Configure Tailwind for class-based dark mode (AFTER loading) -->
     <script>
         tailwind.config = {
           darkMode: 'class',
         }
     </script>
     
-    <!-- Load Chart.js for the pie chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
-    <!-- Load custom font (Inter) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -65,15 +60,11 @@
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen p-4 md:p-8 transition-colors duration-300">
 
-    <!-- Main Application Card -->
-    <div class="max-w-xl w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 space-y-6 transition-colors duration-300">
+    <div class="max-w-xl w-full bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 transition-colors duration-300">
         
-        <!-- Header -->
-        <h1 id="header" class="text-3xl font-bold text-center text-indigo-700 dark:text-indigo-400">Money Manager</h1>
+        <h1 id="header" class="text-3xl font-bold text-center text-indigo-700 dark:text-indigo-400 mb-6">Money Manager</h1>
 
-        <!-- Controls: Language and Theme -->
-        <div class="flex justify-center items-center space-x-4">
-            <!-- Language Selector -->
+        <div class="flex justify-center items-center space-x-4 mb-6">
             <select id="language-selector" class="px-3 py-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 <option value="en">English</option>
                 <option value="zh-TW">繁體中文 (Traditional Chinese)</option>
@@ -81,7 +72,6 @@
                 <option value="ja-JP">日本語 (Japanese)</option>
             </select>
             
-            <!-- Theme Toggle -->
             <label for="theme-toggle" class="flex items-center cursor-pointer">
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-300">☀️</span>
                 <div class="relative mx-2">
@@ -93,142 +83,124 @@
             </label>
         </div>
 
-        <!-- Accounts Section -->
-        <div class="space-y-4">
-            <h2 id="accounts-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200">Accounts</h2>
-            
-            <!-- Add Account Form -->
-            <form id="account-form" class="flex items-center space-x-2">
-                <input type="text" id="account-name" placeholder="e.g., Bank, Cash" required class="flex-grow px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
-                <button id="add-account-btn" type="submit" class="bg-indigo-500 text-white font-medium py-2 px-4 rounded-lg shadow-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-indigo-600 dark:hover:bg-indigo-700">
-                    Add Account
-                </button>
-            </form>
-
-            <!-- Account List -->
-            <div id="account-list-empty" class="text-center text-gray-500 dark:text-gray-400 py-2">
-                Add an account to get started.
-            </div>
-            <ul id="account-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <!-- Example Account Item -->
-                <!-- 
-                <li class="flex justify-between items-center bg-blue-50 dark:bg-blue-900 p-3 rounded-lg border border-blue-200 dark:border-blue-700">
-                    <span class="font-semibold text-blue-800 dark:text-blue-200">Bank</span>
-                    <span class="font-bold text-blue-700 dark:text-blue-300">$1,200.00</span>
-                </li> 
-                -->
-            </ul>
+        <div class="mb-6">
+            <nav class="flex space-x-2 p-1 bg-gray-200 dark:bg-gray-700 rounded-lg">
+                <button id="tab-dashboard-btn" class="tab-btn flex-1 py-2 px-4 rounded-md font-semibold text-sm focus:outline-none transition-colors">
+                    </button>
+                <button id="tab-reports-btn" class="tab-btn flex-1 py-2 px-4 rounded-md font-semibold text-sm focus:outline-none transition-colors">
+                    </button>
+            </nav>
         </div>
 
-        <!-- Dashboard -->
-        <div class="space-y-4">
-            <h2 id="total-balance-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200 border-t dark:border-gray-700 pt-6">Total Balance</h2>
-            <div id="total-balance" class="text-4xl font-bold text-gray-900 dark:text-gray-100">$0.00</div>
-            
-            <div class="grid grid-cols-2 gap-4">
-                <!-- Total Income Card -->
-                <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg border border-green-200 dark:border-green-700">
-                    <h3 id="total-income-title" class="text-sm font-medium text-green-700 dark:text-green-300 uppercase">Total Income</h3>
-                    <div id="total-income" class="text-2xl font-semibold text-green-600 dark:text-green-400">$0.00</div>
-                </div>
-                <!-- Total Expense Card -->
-                <div class="bg-red-50 dark:bg-red-900 p-4 rounded-lg border border-red-200 dark:border-red-700">
-                    <h3 id="total-expense-title" class="text-sm font-medium text-red-700 dark:text-red-300 uppercase">Total Expense</h3>
-                    <div id="total-expense" class="text-2xl font-semibold text-red-600 dark:text-red-400">$0.00</div>
-                </div>
-            </div>
-        </div>
+        <div id="tab-dashboard-panel" class="tab-panel space-y-6">
 
-        <!-- Add New Transaction Form -->
-        <div class="space-y-4">
-            <h2 id="new-transaction-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200 border-t dark:border-gray-700 pt-6">Add New Transaction</h2>
-            <form id="transaction-form" class="space-y-4">
+            <div class="space-y-4">
+                <h2 id="accounts-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200">Accounts</h2>
+                
+                <form id="account-form" class="flex items-center space-x-2">
+                    <input type="text" id="account-name" placeholder="e.g., Bank, Cash" required class="flex-grow px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                    <button id="add-account-btn" type="submit" class="bg-indigo-500 text-white font-medium py-2 px-4 rounded-lg shadow-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-indigo-600 dark:hover:bg-indigo-700">
+                        Add Account
+                    </button>
+                </form>
+
+                <div id="account-list-empty" class="text-center text-gray-500 dark:text-gray-400 py-2">
+                    Add an account to get started.
+                </div>
+                <ul id="account-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    </ul>
+            </div>
+
+            <div class="space-y-4">
+                <h2 id="total-balance-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200 border-t dark:border-gray-700 pt-6">Total Balance</h2>
+                <div id="total-balance" class="text-4xl font-bold text-gray-900 dark:text-gray-100">$0.00</div>
+                
                 <div class="grid grid-cols-2 gap-4">
-                    <!-- Transaction Type -->
+                    <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg border border-green-200 dark:border-green-700">
+                        <h3 id="total-income-title" class="text-sm font-medium text-green-700 dark:text-green-300 uppercase">Total Income</h3>
+                        <div id="total-income" class="text-2xl font-semibold text-green-600 dark:text-green-400">$0.00</div>
+                    </div>
+                    <div class="bg-red-50 dark:bg-red-900 p-4 rounded-lg border border-red-200 dark:border-red-700">
+                        <h3 id="total-expense-title" class="text-sm font-medium text-red-700 dark:text-red-300 uppercase">Total Expense</h3>
+                        <div id="total-expense" class="text-2xl font-semibold text-red-600 dark:text-red-400">$0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h2 id="new-transaction-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200 border-t dark:border-gray-700 pt-6">Add New Transaction</h2>
+                <form id="transaction-form" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label id="type-label" for="type" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Type</label>
+                            <select id="type" name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option id="income-option" value="income">Income</option>
+                                <option id="expense-option" value="expense">Expense</option>
+                                <option id="transfer-option" value="transfer">Transfer</option>
+                            </select>
+                        </div>
+                        <div id="account-from-row">
+                            <label id="account-from-label" for="account-from-select" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Account</label>
+                            <select id="account-from-select" name="account-from-select" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                </select>
+                        </div>
+                        <div id="account-to-row" style="display: none;">
+                            <label id="account-to-label" for="account-to-select" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">To Account</label>
+                            <select id="account-to-select" name="account-to-select" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                </select>
+                        </div>
+                    </div>
+                    
+                    <div id="category-row">
+                        <label id="category-label" for="category" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Category</label>
+                        <select id="category" name="category" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            </select>
+                    </div>
+                    
                     <div>
-                        <label id="type-label" for="type" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Type</label>
-                        <select id="type" name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                            <option id="income-option" value="income">Income</option>
-                            <option id="expense-option" value="expense">Expense</option>
-                            <option id="transfer-option" value="transfer">Transfer</option>
-                        </select>
+                        <label id="desc-label" for="desc" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Description (Optional)</label>
+                        <input type="text" id="desc" name="desc" placeholder="e.g., Lunch with client" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
                     </div>
-                    <!-- Account (From) -->
-                    <div id="account-from-row">
-                        <label id="account-from-label" for="account-from-select" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Account</label>
-                        <select id="account-from-select" name="account-from-select" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                            <!-- Options will be dynamically populated -->
-                        </select>
+                    
+                    <div>
+                        <label id="amount-label" for="amount" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Amount</label>
+                        <input type="number" id="amount" name="amount" placeholder="0.00" min="0.01" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
                     </div>
-                    <!-- Account (To) -->
-                    <div id="account-to-row" style="display: none;">
-                        <label id="account-to-label" for="account-to-select" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">To Account</label>
-                        <select id="account-to-select" name="account-to-select" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                            <!-- Options will be dynamically populated -->
-                        </select>
-                    </div>
-                </div>
-                
-                <!-- Category -->
-                <div id="category-row">
-                    <label id="category-label" for="category" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Category</label>
-                    <select id="category" name="category" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                        <!-- Options will be dynamically populated -->
-                    </select>
-                </div>
-                
-                <!-- Description -->
-                <div>
-                    <label id="desc-label" for="desc" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Description (Optional)</label>
-                    <input type="text" id="desc" name="desc" placeholder="e.g., Lunch with client" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
-                </div>
-                
-                <!-- Amount -->
-                <div>
-                    <label id="amount-label" for="amount" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Amount</label>
-                    <input type="number" id="amount" name="amount" placeholder="0.00" min="0.01" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
-                </div>
-                
-                <!-- Submit Button -->
-                <button id="add-transaction-btn" type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 dark:bg-indigo-700 dark:hover:bg-indigo-800">
-                    Add Transaction
-                </button>
-            </form>
-        </div>
-
-        <!-- Expense Breakdown Chart -->
-        <div class="space-y-4">
-            <h2 id="chart-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200 border-t dark:border-gray-700 pt-6">Expense Breakdown</h2>
-            <div id="chart-empty-state" class="text-center text-gray-500 dark:text-gray-400 py-4">
-                Add an expense to see the chart.
-            </div>
-            <div class="w-full max-w-md mx-auto h-64">
-                <canvas id="expense-chart"></canvas>
+                    
+                    <button id="add-transaction-btn" type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 dark:bg-indigo-700 dark:hover:bg-indigo-800">
+                        Add Transaction
+                    </button>
+                </form>
             </div>
         </div>
+        <div id="tab-reports-panel" class="tab-panel space-y-6" style="display: none;">
 
-        <!-- Transaction History -->
-        <div class="space-y-4">
-            <!-- History Header with Download Button -->
-            <div class="flex justify-between items-center border-t dark:border-gray-700 pt-6">
-                <h2 id="history-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200">History</h2>
-                <button id="download-csv-btn" class="text-sm bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-1 px-3 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
-                    Download CSV
-                </button>
+            <div class="space-y-4">
+                <h2 id="chart-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200">Expense Breakdown</h2>
+                <div id="chart-empty-state" class="text-center text-gray-500 dark:text-gray-400 py-4">
+                    Add an expense to see the chart.
+                </div>
+                <div class="w-full max-w-md mx-auto h-64">
+                    <canvas id="expense-chart"></canvas>
+                </div>
             </div>
-            
-            <!-- Message for when the list is empty -->
-            <div id="empty-state" class="text-center text-gray-500 dark:text-gray-400 py-4">
-                No transactions yet.
+
+            <div class="space-y-4">
+                <div class="flex justify-between items-center border-t dark:border-gray-700 pt-6">
+                    <h2 id="history-title" class="text-xl font-semibold text-gray-700 dark:text-gray-200">History</h2>
+                    <button id="download-csv-btn" class="text-sm bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-1 px-3 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                        Download CSV
+                    </button>
+                </div>
+                
+                <div id="empty-state" class="text-center text-gray-500 dark:text-gray-400 py-4">
+                    No transactions yet.
+                </div>
+                <ul id="transaction-list" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                    </ul>
             </div>
-            <!-- List of transactions -->
-            <ul id="transaction-list" class="space-y-3 max-h-60 overflow-y-auto pr-2">
-                <!-- Transactions will be dynamically inserted here -->
-            </ul>
         </div>
-    </div>
-
-    <script>
+        </div> <script>
         // --- Constants ---
         const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Bonus', 'Investment', 'Other'];
         const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Utilities', 'Rent', 'Entertainment', 'Shopping', 'Health', 'Other'];
@@ -242,6 +214,8 @@
             'en': {
                 title: "Money Manager",
                 header: "Money Manager",
+                tabDashboard: "Dashboard", // New
+                tabReports: "Reports", // New
                 accountsTitle: "Accounts",
                 accountPlaceholder: "e.g., Bank, Cash",
                 addAccountBtn: "Add Account",
@@ -270,10 +244,10 @@
                 historyEmpty: "No transactions yet.",
                 deleteTooltip: "Delete transaction",
                 unknownAccount: "Unknown",
-                downloadCsvBtn: "Download CSV", // New
-                pdfDate: "Date", // New
-                pdfType: "Type", // New
-                pdfAccount: "Account", // New
+                downloadCsvBtn: "Download CSV",
+                pdfDate: "Date",
+                pdfType: "Type",
+                pdfAccount: "Account",
                 categories: {
                     'Salary': 'Salary', 'Freelance': 'Freelance', 'Bonus': 'Bonus', 'Investment': 'Investment',
                     'Food': 'Food', 'Transport': 'Transport', 'Utilities': 'Utilities', 'Rent': 'Rent', 'Entertainment': 'Entertainment', 'Shopping': 'Shopping', 'Health': 'Health', 'Other': 'Other',
@@ -283,6 +257,8 @@
             'zh-TW': {
                 title: "記帳本",
                 header: "記帳本",
+                tabDashboard: "儀表板", // New
+                tabReports: "報告", // New
                 accountsTitle: "帳戶",
                 accountPlaceholder: "例如：銀行, 現金",
                 addAccountBtn: "新增帳戶",
@@ -311,10 +287,10 @@
                 historyEmpty: "尚無交易紀錄",
                 deleteTooltip: "刪除交易",
                 unknownAccount: "未知帳戶",
-                downloadCsvBtn: "下載 CSV", // New
-                pdfDate: "日期", // New
-                pdfType: "類型", // New
-                pdfAccount: "帳戶", // New
+                downloadCsvBtn: "下載 CSV",
+                pdfDate: "日期",
+                pdfType: "類型",
+                pdfAccount: "帳戶",
                 categories: {
                     'Salary': '薪水', 'Freelance': '接案', 'Bonus': '獎金', 'Investment': '投資',
                     'Food': '食物', 'Transport': '交通', 'Utilities': '水電瓦斯', 'Rent': '租金', 'Entertainment': '娛樂', 'Shopping': '購物', 'Health': '健康', 'Other': '其他',
@@ -324,6 +300,8 @@
             'zh-CN': {
                 title: "记账本",
                 header: "记账本",
+                tabDashboard: "仪表板", // New
+                tabReports: "报告", // New
                 accountsTitle: "账户",
                 accountPlaceholder: "例如：银行, 现金",
                 addAccountBtn: "新增账户",
@@ -352,10 +330,10 @@
                 historyEmpty: "尚无交易记录",
                 deleteTooltip: "删除交易",
                 unknownAccount: "未知账户",
-                downloadCsvBtn: "下载 CSV", // New
-                pdfDate: "日期", // New
-                pdfType: "类型", // New
-                pdfAccount: "账户", // New
+                downloadCsvBtn: "下载 CSV",
+                pdfDate: "日期",
+                pdfType: "类型",
+                pdfAccount: "账户",
                 categories: {
                     'Salary': '薪水', 'Freelance': 'SOHO', 'Bonus': '奖金', 'Investment': '投资',
                     'Food': '食物', 'Transport': '交通', 'Utilities': '水电费', 'Rent': '房租', 'Entertainment': '娱乐', 'Shopping': '购物', 'Health': '健康', 'Other': '其他',
@@ -365,6 +343,8 @@
             'ja-JP': {
                 title: "家計簿マネージャー",
                 header: "家計簿マネージャー",
+                tabDashboard: "ダッシュボード", // New
+                tabReports: "レポート", // New
                 accountsTitle: "口座",
                 accountPlaceholder: "例：銀行, 現金",
                 addAccountBtn: "口座を追加",
@@ -393,10 +373,10 @@
                 historyEmpty: "まだ取引がありません",
                 deleteTooltip: "取引を削除",
                 unknownAccount: "不明な口座",
-                downloadCsvBtn: "CSVをダウンロード", // New
-                pdfDate: "日付", // New
-                pdfType: "タイプ", // New
-                pdfAccount: "口座", // New
+                downloadCsvBtn: "CSVをダウンロード",
+                pdfDate: "日付",
+                pdfType: "タイプ",
+                pdfAccount: "口座",
                 categories: {
                     'Salary': '給与', 'Freelance': 'フリーランス', 'Bonus': 'ボーナス', 'Investment': '投資',
                     'Food': '食費', 'Transport': '交通費', 'Utilities': '光熱費', 'Rent': '家賃', 'Entertainment': '娯楽', 'Shopping': '買い物', 'Health': '健康', 'Other': 'その他',
@@ -432,7 +412,13 @@
 
         const langSelector = document.getElementById('language-selector');
         const themeToggle = document.getElementById('theme-toggle');
-        const downloadCsvBtn = document.getElementById('download-csv-btn'); // New
+        const downloadCsvBtn = document.getElementById('download-csv-btn');
+
+        // New Tab Elements
+        const tabDashboardBtn = document.getElementById('tab-dashboard-btn');
+        const tabReportsBtn = document.getElementById('tab-reports-btn');
+        const tabDashboardPanel = document.getElementById('tab-dashboard-panel');
+        const tabReportsPanel = document.getElementById('tab-reports-panel');
 
         // --- App State ---
         let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY_TRANSACTIONS)) || [];
@@ -718,7 +704,11 @@
 
             expenseChart.data.labels = labels;
             expenseChart.data.datasets[0].data = data;
-            expenseChart.update();
+            
+            // Check if chart is initialized before updating
+            if(expenseChart) {
+                expenseChart.update();
+            }
         }
 
         /**
@@ -741,7 +731,7 @@
             currentLang = lang; // Set the global state
             localStorage.setItem(STORAGE_KEY_LANGUAGE, currentLang);
 
-            const t = i18n[lang];
+            let t = i18n[lang];
             if (!t) {
                 console.error(`Language ${lang} not found, defaulting to 'en'.`);
                 t = i18n['en'];
@@ -750,6 +740,11 @@
             // --- Apply translations ---
             document.title = t.title;
             document.getElementById('header').textContent = t.header;
+            
+            // New Tab Buttons
+            document.getElementById('tab-dashboard-btn').textContent = t.tabDashboard;
+            document.getElementById('tab-reports-btn').textContent = t.tabReports;
+            
             document.getElementById('accounts-title').textContent = t.accountsTitle;
             document.getElementById('account-name').placeholder = t.accountPlaceholder;
             document.getElementById('add-account-btn').textContent = t.addAccountBtn;
@@ -774,7 +769,7 @@
             document.getElementById('chart-empty-state').textContent = t.chartEmpty;
             document.getElementById('history-title').textContent = t.historyTitle;
             document.getElementById('empty-state').textContent = t.historyEmpty;
-            document.getElementById('download-csv-btn').textContent = t.downloadCsvBtn; // New
+            document.getElementById('download-csv-btn').textContent = t.downloadCsvBtn;
             
             // Update categories dropdown (if visible)
             updateCategoryOptions();
@@ -988,7 +983,7 @@
             updateSummary();
         }
 
-        // --- Download CSV Function (New) ---
+        // --- Download CSV Function ---
         
         /**
          * Handles the click event to download the transaction history as a CSV file.
@@ -1067,6 +1062,43 @@
             document.body.removeChild(link);
         }
 
+        // --- NEW: Tab Switching Function ---
+        /**
+         * Shows the specified tab and hides the other.
+         * @param {'dashboard' | 'reports'} tabName The tab to show.
+         */
+        function showTab(tabName) {
+            const activeClasses = 'bg-indigo-600 text-white dark:bg-indigo-600'.split(' ');
+            const inactiveClasses = 'text-gray-600 hover:bg-gray-300 dark:text-gray-300 dark:hover:bg-gray-600'.split(' ');
+            
+            if (tabName === 'dashboard') {
+                tabDashboardPanel.style.display = 'block';
+                tabReportsPanel.style.display = 'none';
+                
+                tabDashboardBtn.classList.remove(...inactiveClasses);
+                tabDashboardBtn.classList.add(...activeClasses);
+                
+                tabReportsBtn.classList.remove(...activeClasses);
+                tabReportsBtn.classList.add(...inactiveClasses);
+            } else { // 'reports'
+                tabDashboardPanel.style.display = 'none';
+                tabReportsPanel.style.display = 'block';
+                
+                tabDashboardBtn.classList.remove(...activeClasses);
+                tabDashboardBtn.classList.add(...inactiveClasses);
+                
+                tabReportsBtn.classList.remove(...inactiveClasses);
+                tabReportsBtn.classList.add(...activeClasses);
+
+                // IMPORTANT: Update/resize the chart when its tab is shown
+                // to ensure it renders correctly.
+                updatePieChart();
+                if (expenseChart) {
+                    expenseChart.resize(); // Helps fit the container
+                }
+            }
+        }
+
 
         /**
          * Initializes the application.
@@ -1079,7 +1111,11 @@
             typeInput.addEventListener('change', handleTypeChange);
             langSelector.addEventListener('change', (e) => applyLanguage(e.target.value));
             themeToggle.addEventListener('change', handleThemeToggle);
-            downloadCsvBtn.addEventListener('click', handleDownloadCSV); // New
+            downloadCsvBtn.addEventListener('click', handleDownloadCSV);
+            
+            // New Tab Listeners
+            tabDashboardBtn.addEventListener('click', () => showTab('dashboard'));
+            tabReportsBtn.addEventListener('click', () => showTab('reports'));
 
             
             // --- Initial Setup ---
@@ -1097,6 +1133,9 @@
             
             // Apply language and render all data
             applyLanguage(currentLang); 
+            
+            // Set initial tab
+            showTab('dashboard');
         }
 
         // --- Run the App ---
